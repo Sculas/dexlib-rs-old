@@ -2,7 +2,7 @@
 name = "dexlib"
 version = "0.5.0"
 authors = ["Rohit Kumar <letmutx@gmail.com>", "Sculas <contact@sculas.xyz>"]
-edition = "2018"
+edition = "2021"
 description = "Rust parser/writer for Android's dex format"
 repository = "https://github.com/Sculas/dexlib-rs.git"
 license = "MIT"
