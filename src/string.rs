@@ -58,10 +58,9 @@ impl Deref for DexString {
 
 impl<'a> ctx::TryFromCtx<'a, scroll::Endian> for DexString {
     type Error = error::Error;
-    type Size = usize;
 
     // https://source.android.com/devices/tech/dalvik/dex-format#string-data-item
-    fn try_from_ctx(source: &'a [u8], _: scroll::Endian) -> Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], _: scroll::Endian) -> Result<(Self, usize)> {
         let offset = &mut 0;
         let _ = Uleb128::read(source, offset)?;
         let count = source
@@ -124,14 +123,14 @@ where
     fn parse(&self, id: StringId) -> Result<DexString> {
         let source = &self.source;
         let offset = self.offset as usize + id as usize * 4;
-        let string_data_off: uint = source.pread_with(offset, self.endian)?;
+        let string_data_off: uint = source.as_ref().pread_with(offset, self.endian)?;
         if !self.data_section.contains(&string_data_off) {
             return Err(error::Error::BadOffset(
                 string_data_off as usize,
                 format!("string_data_off not in data section for StringId: {}", id),
             ));
         }
-        source.pread(string_data_off as usize)
+        source.as_ref().pread(string_data_off as usize)
     }
 
     /// Get the string at `id` updating the cache with the new item

@@ -42,7 +42,7 @@ macro_rules! gen_is_type_method {
         pub fn $func_name(&self) -> bool {
             self.type_descriptor == $descriptor
         }
-    }
+    };
 }
 
 impl Type {

@@ -254,9 +254,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let static_field_size = Uleb128::read(source, offset)?;
         let instance_field_size = Uleb128::read(source, offset)?;

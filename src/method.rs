@@ -152,7 +152,7 @@ impl Method {
             }
             let offset = &mut (proto_item.params_off as usize);
             let endian = dex.get_endian();
-            let len = source.gread_with::<uint>(offset, endian)?;
+            let len = source.as_ref().gread_with::<uint>(offset, endian)?;
             let type_ids: Vec<ushort> = try_gread_vec_with!(source, offset, len, endian);
             utils::get_types(dex, &type_ids)?
         } else {
@@ -198,7 +198,7 @@ impl MethodIdItem {
         dex: &super::Dex<S>,
         offset: ulong,
     ) -> super::Result<Self> {
-        let source = &dex.source;
+        let source = dex.source.as_ref();
         Ok(source.pread_with(offset as usize, dex.get_endian())?)
     }
 }
@@ -237,9 +237,8 @@ pub type EncodedMethodArray = EncodedItemArray<EncodedMethod>;
 
 impl<'a> ctx::TryFromCtx<'a, ulong> for EncodedMethod {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], prev_id: ulong) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], prev_id: ulong) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let id = Uleb128::read(source, offset)?;
         let access_flags = Uleb128::read(source, offset)?;
@@ -290,9 +289,8 @@ pub struct MethodHandleItem {
 
 impl<'a, S: AsRef<[u8]>> ctx::TryFromCtx<'a, &super::Dex<S>> for MethodHandleItem {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let endian = dex.get_endian();
         let offset = &mut 0;
         let handle_type: ushort = source.gread_with(offset, endian)?;

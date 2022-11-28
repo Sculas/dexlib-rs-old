@@ -1,4 +1,4 @@
-use dex::DexReader;
+use dexlib::DexReader;
 
 use std::io;
 

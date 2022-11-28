@@ -60,15 +60,14 @@ impl<'a, S: AsRef<[u8]>> Clone for EncodedItemArrayCtx<'a, S> {
 impl<'a, S, T: 'a> ctx::TryFromCtx<'a, EncodedItemArrayCtx<'a, S>> for EncodedItemArray<T>
 where
     S: AsRef<[u8]>,
-    T: EncodedItem + ctx::TryFromCtx<'a, ulong, Size = usize, Error = Error>,
+    T: EncodedItem + ctx::TryFromCtx<'a, ulong, Error = Error>,
 {
     type Error = Error;
-    type Size = usize;
 
     fn try_from_ctx(
         source: &'a [u8],
         ctx: EncodedItemArrayCtx<'a, S>,
-    ) -> super::Result<(Self, Self::Size)> {
+    ) -> super::Result<(Self, usize)> {
         let len = ctx.len;
         let mut prev = 0;
         let offset = &mut 0;
@@ -115,9 +114,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = crate::error::Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let size = Sleb128::read(source, offset)?;
         let type_addr_pairs: Vec<EncodedTypeAddrPair> =
@@ -147,9 +145,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = crate::error::Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let encoded_handler_size = Uleb128::read(source, offset)?;
         let mut encoded_catch_handlers = Vec::with_capacity(encoded_handler_size as usize);
@@ -175,9 +172,8 @@ pub(crate) struct EncodedTypeAddrPair {
 
 impl<'a> ctx::TryFromCtx<'a, ()> for EncodedTypeAddrPair {
     type Error = crate::error::Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], _: ()) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], _: ()) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let type_id = Uleb128::read(source, offset)?;
         let addr = Uleb128::read(source, offset)?;

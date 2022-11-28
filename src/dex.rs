@@ -177,9 +177,8 @@ impl DexInner {
 // TODO: this should be try_from_dex
 impl<'a> ctx::TryFromCtx<'a, ()> for DexInner {
     type Error = error::Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], _: ()) -> Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], _: ()) -> Result<(Self, usize)> {
         if source.len() <= 44 {
             debug!("malformed dex: size < minimum header size");
             return Err(Error::MalFormed("Invalid dex file".to_string()));
@@ -229,9 +228,8 @@ pub struct MapList {
 
 impl<'a> ctx::TryFromCtx<'a, Endian> for MapList {
     type Error = error::Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], endian: Endian) -> Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], endian: Endian) -> Result<(Self, usize)> {
         let offset = &mut 0;
         let size: uint = source.gread_with(offset, endian)?;
         Ok((
@@ -302,9 +300,8 @@ pub struct MapItem {
 
 impl<'a> ctx::TryFromCtx<'a, Endian> for MapItem {
     type Error = error::Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], endian: Endian) -> Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], endian: Endian) -> Result<(Self, usize)> {
         let offset = &mut 0;
         let item_type: ushort = source.gread_with(offset, endian)?;
         let item_type = ItemType::from_u16(item_type).ok_or_else(|| {
@@ -471,7 +468,7 @@ where
         let mut offset = offset as usize;
         let source = &self.source;
         let endian = self.get_endian();
-        let len = source.gread_with::<uint>(&mut offset, endian)?;
+        let len = source.as_ref().gread_with::<uint>(&mut offset, endian)?;
         debug!(target: "interfaces", "interfaces length: {}", len);
         let offset = &mut offset;
         let type_ids: Vec<ushort> = try_gread_vec_with!(source, offset, len, endian);
@@ -568,7 +565,9 @@ where
                 "ClassData offset not in data section".to_string(),
             ));
         }
-        Ok(Some(self.source.pread_with(offset as usize, self)?))
+        Ok(Some(
+            self.source.as_ref().pread_with(offset as usize, self)?,
+        ))
     }
 
     /// Returns the `MethodHandleItem` represented by the `MethodHandleId`.
@@ -584,7 +583,9 @@ where
         if offset > max_offset {
             return Err(err());
         }
-        self.source.gread_with(&mut (offset as usize), self)
+        self.source
+            .as_ref()
+            .gread_with(&mut (offset as usize), self)
     }
 
     /// Returns the endianness in the header section.
@@ -650,7 +651,9 @@ where
                 "CodeItem offset not in data section".to_string(),
             ));
         }
-        Ok(Some(self.source.pread_with(code_off as usize, self)?))
+        Ok(Some(
+            self.source.as_ref().pread_with(code_off as usize, self)?,
+        ))
     }
 
     /// Returns the `AnnotationItem` at the offset.
@@ -662,7 +665,10 @@ where
                 "AnnotationItem offset not in data section".to_string(),
             ));
         }
-        Ok(self.source.pread_with(annotation_off as usize, self)?)
+        Ok(self
+            .source
+            .as_ref()
+            .pread_with(annotation_off as usize, self)?)
     }
 
     /// Returns the `AnnotationSetItem` at the offset.
@@ -681,6 +687,7 @@ where
             ));
         }
         self.source
+            .as_ref()
             .pread_with(annotation_set_item_off as usize, self)
     }
 
@@ -697,6 +704,7 @@ where
         }
         Ok(self
             .source
+            .as_ref()
             .pread_with(annotation_set_ref_list_off as usize, self)?)
     }
 
@@ -712,7 +720,9 @@ where
                 "Class static values offset not in data section".to_string(),
             ));
         }
-        self.source.pread_with(static_values_off as usize, self)
+        self.source
+            .as_ref()
+            .pread_with(static_values_off as usize, self)
     }
 
     /// Returns the `AnnotationsDirectoryItem` at the offset.
@@ -731,6 +741,7 @@ where
             ));
         }
         self.source
+            .as_ref()
             .pread_with(annotations_directory_item_off as usize, self)
     }
 
@@ -743,7 +754,10 @@ where
             ));
         }
 
-        Ok(self.source.pread_with(debug_info_off as usize, self)?)
+        Ok(self
+            .source
+            .as_ref()
+            .pread_with(debug_info_off as usize, self)?)
     }
 }
 
@@ -796,10 +810,9 @@ impl DexReader {
 
 #[cfg(test)]
 mod tests {
-
+    use super::Result;
     use memmap::MmapOptions;
     use std::fs::File;
-    use super::Result;
     use std::path::Path;
 
     #[test]

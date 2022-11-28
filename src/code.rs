@@ -123,12 +123,11 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
     fn try_from_ctx(
         source: &'a [u8],
         (tries_size, dex): (usize, &super::Dex<S>),
-    ) -> Result<(Self, Self::Size), Self::Error> {
+    ) -> Result<(Self, usize), Self::Error> {
         let offset = &mut 0;
         let endian = dex.get_endian();
         let tries: Vec<TryItem> = try_gread_vec_with!(source, offset, tries_size, endian);
@@ -161,12 +160,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(
-        source: &'a [u8],
-        dex: &super::Dex<S>,
-    ) -> Result<(Self, Self::Size), Self::Error> {
+    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> Result<(Self, usize), Self::Error> {
         let offset = &mut 0;
         let line_start = Uleb128::read(source, offset)? as usize;
         let parameters_size = Uleb128::read(source, offset)?;
@@ -194,12 +189,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(
-        source: &'a [u8],
-        dex: &super::Dex<S>,
-    ) -> Result<(Self, Self::Size), Self::Error> {
+    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> Result<(Self, usize), Self::Error> {
         let offset = &mut 0;
         let endian = dex.get_endian();
         let registers_size: ushort = source.gread_with(offset, endian)?;

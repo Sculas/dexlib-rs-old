@@ -23,7 +23,7 @@ impl<'a> Section<'a> {
     where
         S: std::fmt::Debug,
         F: Fn(&T, &S) -> Result<Ordering>,
-        T: ctx::TryFromCtx<'a, C, Size = usize, Error = scroll::Error> + Debug,
+        T: ctx::TryFromCtx<'a, C, Error = scroll::Error> + Debug,
     {
         if self.inner.is_empty() {
             return Ok(None);

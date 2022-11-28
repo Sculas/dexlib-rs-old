@@ -48,9 +48,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let type_idx = Uleb128::read(source, offset)?;
         let jtype = ctx.get_type(type_idx as TypeId)?;
@@ -79,9 +78,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let name_idx = Uleb128::read(source, offset)?;
         let name = ctx.get_string(name_idx as StringId)?;
@@ -128,9 +126,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let visibility: ubyte = source.gread_with(offset, ctx.get_endian())?;
         debug!(target: "annotation-item", "visibility: {:?}", visibility);
@@ -168,9 +165,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let endian = ctx.get_endian();
         let size: uint = source.gread_with(offset, endian)?;
@@ -211,9 +207,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let endian = ctx.get_endian();
         let size: uint = source.gread_with(offset, endian)?;
@@ -247,9 +242,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let endian = ctx.get_endian();
         let method_idx: uint = source.gread_with(offset, endian)?;
@@ -279,9 +273,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let method_idx: uint = source.gread_with(offset, ctx.get_endian())?;
         let annotation_set_item_off: uint = source.gread_with(offset, ctx.get_endian())?;
@@ -311,9 +304,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let field_idx: uint = source.gread_with(offset, ctx.get_endian())?;
         let annotation_set_item_off: uint = source.gread_with(offset, ctx.get_endian())?;
@@ -343,9 +335,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let endian = ctx.get_endian();
         let class_annotations_off: uint = source.gread_with(offset, endian)?;

@@ -75,23 +75,23 @@ impl TestBuilder {
 }
 
 macro_rules! assert_has_access_flags {
-    ($item: ident, [ $($flag: ident),+ ], $msg:expr) => {
+    ($item:ident, [$($flag:ident),+], $msg:expr) => {
         $(
             assert!($item.$flag(), $msg);
         )*
     };
 
-    ($item: ident, [ $($flag: ident),+ ]) => {
-        assert_has_access_flags!($item,  [$($flag),+], "")
+    ($item:ident, [$($flag:ident),+]) => {
+        assert_has_access_flags!($item, [$($flag),+], "")
     }
 }
 
 // TODO: support test attributes if necessary
 macro_rules! test {
-    ($test_name: ident, $({ $fname:expr => $code:expr });+,$test_func:expr) => {
+    ($test_name:ident, $({ $fname:expr => $code:expr });+, $test_func:expr) => {
         #[test]
         fn $test_name() {
-            use dex::DexReader;
+            use dexlib::DexReader;
             let mut builder = TestBuilder::new();
             $(
                builder.add_src($fname, $code);
@@ -149,7 +149,7 @@ test!(
             }
         "#
     },
-    |dex: dex::Dex<_>| {
+    |dex: dexlib::Dex<_>| {
         assert_eq!(dex.header().class_defs_size(), 4);
         let find = |name| {
             let class = dex.find_class_by_name(name);
@@ -174,7 +174,7 @@ test!(
             class Main {}
         "#
     },
-    |dex: dex::Dex<_>| {
+    |dex: dexlib::Dex<_>| {
         let class = dex.find_class_by_name("LMain;");
         assert!(class.is_ok());
         let class = class.unwrap();
@@ -209,9 +209,9 @@ test!(
             }
         "#
     },
-    |dex: dex::Dex<_>| {
-        use dex::annotation::Visibility;
-        use dex::encoded_value::EncodedValue;
+    |dex: dexlib::Dex<_>| {
+        use dexlib::annotation::Visibility;
+        use dexlib::encoded_value::EncodedValue;
 
         let annotation_class = dex.find_class_by_name("LAnnotation;");
         assert!(annotation_class.is_ok());
@@ -238,6 +238,7 @@ test!(
         assert!(field.is_some());
         let field = field.unwrap();
 
+        // FIXME: This test fails. The annotation doesn't exist on the field, while it should.
         let annotation_item = field.annotations().iter().find(|i| i.jtype() == "LAnnotation;");
         assert!(annotation_item.is_some());
         let annotation_item = annotation_item.unwrap();
@@ -319,13 +320,13 @@ test!(
             }
         "#
     },
-    |dex: dex::Dex<_>| {
+    |dex: dexlib::Dex<_>| {
         let class = dex.find_class_by_name("LMain;").unwrap().unwrap();
         assert_eq!(class.static_fields().len(), 1);
         assert_eq!(class.instance_fields().len(), 14);
         let find = |name, jtype| {
             let field = class.fields().find(|f| f.name() == name);
-            assert!(field.is_some(), format!("name: {}, type: {}", name, jtype));
+            assert!(field.is_some(), "name: {}, type: {}", name, jtype);
             let field = field.unwrap();
             assert_eq!(field.jtype(), jtype);
             field
@@ -382,7 +383,7 @@ test!(
 
         let enum_field = find("enumField", "LDay;");
         assert!(enum_field.access_flags().is_empty());
-        
+
     }
 );
 
@@ -415,9 +416,9 @@ test!(
             }
         "#
     },
-    |dex: dex::Dex<_>| {
-        use dex::string::DexString;
-        use dex::encoded_value::EncodedValue;
+    |dex: dexlib::Dex<_>| {
+        use dexlib::string::DexString;
+        use dexlib::encoded_value::EncodedValue;
         let class = dex.find_class_by_name("LFieldValues;").expect("error getting FieldValues.class").expect("class not found");
         assert_eq!(class.fields().count(), 20);
         let get_value = |name| {
@@ -484,17 +485,17 @@ test!(
             }
         "#
     },
-    |dex: dex::Dex<_>| {
-        use dex::class::Class;
+    |dex: dexlib::Dex<_>| {
+        use dexlib::class::Class;
         let validate_interface_methods = |interface: &Class| {
             interface.methods().for_each(|m| {
-                assert_has_access_flags!(m, [is_public, is_abstract], format!("interface method: {} doesn't have all attributes", m.name()));
-                assert!(m.code().is_none(), format!("interface method: {} shouldn't have code item", m.name()));
+                assert_has_access_flags!(m, [is_public, is_abstract], "interface method doesn't have all attributes");
+                assert!(m.code().is_none(), "interface method: {} shouldn't have code item", m.name());
             });
         };
         let validate_interface_fields = |interface: &Class| {
             interface.fields().for_each(|f| {
-                assert_has_access_flags!(f, [is_public, is_static, is_final], format!("interface field: {} doesn't have all attributes", f.name()));
+                assert_has_access_flags!(f, [is_public, is_static, is_final], "interface field doesn't have all attributes");
             });
         };
 
@@ -552,7 +553,7 @@ test!(
             }
         "#
     },
-    |dex: dex::Dex<_>| {
+    |dex: dexlib::Dex<_>| {
         let abstract_class = dex.find_class_by_name("LAbstractClass;");
         assert!(abstract_class.is_ok());
         let abstract_class = abstract_class.unwrap();
@@ -581,7 +582,7 @@ test!(
             }
         "#
     },
-    |dex: dex::Dex<_>| {
+    |dex: dexlib::Dex<_>| {
         let enum_class = dex.find_class_by_name("LEnumClass;");
         assert!(enum_class.is_ok());
         let enum_class = enum_class.unwrap();
@@ -675,18 +676,18 @@ test!(
             }
         "#
     },
-    |dex: dex::Dex<_>| {
+    |dex: dexlib::Dex<_>| {
         let class = dex.find_class_by_name("LMain;").unwrap().unwrap();
         assert_eq!(class.direct_methods().len(), 9);
         assert_eq!(class.virtual_methods().len(), 21);
 
         let find = |name, params: &[&str], return_type: &str| {
             let method = class.methods().find(|m| {
-                m.name() == name && 
+                m.name() == name &&
                     m.params().iter().map(|s| s.type_descriptor()).eq(params.iter()) &&
                     m.return_type() == return_type
             });
-            assert!(method.is_some(), format!("method: {}, params: {:?}, return_type: {}", name, params, return_type));
+            assert!(method.is_some(), "method: {}, params: {:?}, return_type: {}", name, params, return_type);
             let method = method.unwrap();
             method
         };
@@ -753,7 +754,7 @@ test!(
         assert!(primitive_params_method.code().is_some());
         assert!(primitive_params_method.access_flags().is_empty());
         assert_eq!(primitive_params_method.shorty(), "ICSBIJZDF");
-        
+
         let class_params_method = find("classParams", &["Ljava/lang/String;", "Ljava/lang/String;"], "Ljava/lang/String;");
         assert!(class_params_method.code().is_some());
         assert!(class_params_method.access_flags().is_empty());
@@ -763,7 +764,7 @@ test!(
         assert!(enum_params_method.code().is_some());
         assert!(enum_params_method.access_flags().is_empty());
         assert_eq!(enum_params_method.shorty(), "VL");
-        
+
         let primitive_array_params_method = find("primitiveArrayParam", &["[J"], "V");
         assert!(primitive_array_params_method.code().is_some());
         assert!(primitive_array_params_method.access_flags().is_empty());
@@ -851,7 +852,7 @@ test!(
 
 #[test]
 fn test_iterators() {
-    use dex::DexReader;
+    use dexlib::DexReader;
     let dex = DexReader::from_file("resources/classes.dex").expect("can't open dex");
     for jtype in dex.types() {
         assert!(jtype.is_ok());

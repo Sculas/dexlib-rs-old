@@ -1,4 +1,4 @@
-use std::{cell::RefCell, cmp::Eq, hash::Hash, rc::Rc};
+use std::{cell::RefCell, cmp::Eq, hash::Hash, num::NonZeroUsize, rc::Rc};
 
 use lru::LruCache;
 
@@ -11,7 +11,7 @@ impl<K: Hash + Eq, V: Clone> Cache<K, V> {
     /// Get a new instance of cache with the given capacity
     pub(crate) fn new(cap: usize) -> Self {
         Self {
-            inner: Rc::new(RefCell::new(LruCache::new(cap))),
+            inner: Rc::new(RefCell::new(LruCache::new(NonZeroUsize::new(cap).unwrap()))),
         }
     }
 

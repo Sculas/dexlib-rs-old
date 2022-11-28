@@ -125,7 +125,7 @@ impl FieldIdItem {
         dex: &super::Dex<T>,
         offset: ulong,
     ) -> super::Result<Self> {
-        let source = &dex.source;
+        let source = dex.source.as_ref();
         Ok(source.pread_with(offset as usize, dex.get_endian())?)
     }
 }
@@ -153,9 +153,8 @@ impl EncodedItem for EncodedField {
 
 impl<'a> ctx::TryFromCtx<'a, ulong> for EncodedField {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], prev_id: ulong) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], prev_id: ulong) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let id = Uleb128::read(source, offset)?;
         let access_flags = Uleb128::read(source, offset)?;

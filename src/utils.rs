@@ -15,7 +15,7 @@ macro_rules! try_gread_vec_with {
         // NOTE: gread_inout_with doesn't work when de-serializing encoded array
         // so using an explicit loop here.
         for _ in 0..cap {
-            vec.push($source.gread_with($offset, ctx)?);
+            vec.push($source.as_ref().gread_with($offset, ctx)?);
         }
         vec
     }};
@@ -69,7 +69,7 @@ macro_rules! gen_is_flag_set {
         pub fn $name(&self) -> bool {
             self.access_flags().contains(AccessFlags::$flag)
         }
-    }
+    };
 }
 
 pub(crate) fn get_signature(annotations: &AnnotationSetItem) -> super::Result<Option<String>> {

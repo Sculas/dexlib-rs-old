@@ -146,10 +146,10 @@ macro_rules! gen_is_type_method {
         pub fn $name(&self) -> bool {
             match self {
                 $match_value => true,
-                _ => false
+                _ => false,
             }
         }
-    }
+    };
 }
 
 impl EncodedValue {
@@ -316,10 +316,9 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
     #[allow(clippy::cognitive_complexity)]
-    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], dex: &super::Dex<S>) -> Result<(Self, usize)> {
         let offset = &mut 0;
         let header: ubyte = source.gread(offset)?;
         let value_arg = (header >> 5) as usize;
@@ -430,9 +429,8 @@ where
     S: AsRef<[u8]>,
 {
     type Error = Error;
-    type Size = usize;
 
-    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, Self::Size)> {
+    fn try_from_ctx(source: &'a [u8], ctx: &super::Dex<S>) -> super::Result<(Self, usize)> {
         let offset = &mut 0;
         let size = Uleb128::read(source, offset)?;
         // TODO: find out why try_gread_vec_with! doesn't work here: fails in scroll
