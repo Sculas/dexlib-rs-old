@@ -1,19 +1,14 @@
-# Dex
-
-[![Build Status](https://api.travis-ci.org/letmutx/dex-parser.svg?branch=master)](https://travis-ci.org/letmutx/dex-parser)
-
-Dex is a parser for Android's [Dex](https://source.android.com/devices/tech/dalvik/dex-format) format written completely in Rust.
-
-Most of the functionality to access the data structures in the file is implemented. Test coverage stands at 81% as of v0.3.0
+# dexlib
+dexlib is a parser (and soon writer) for Android's [dex](https://source.android.com/devices/tech/dalvik/dex-format) format written completely in Rust.
 
 ## Usage
 Add to your `Cargo.toml`:
 ```
-dex = "0.4.0"
+dexlib = { git = "https://github.com/Sculas/dexlib-rs" }
 ```
 
 ## Documentation
-The primary source of documentation for dex format is [Android website](https://source.android.com/devices/tech/dalvik/dex-format). Most of the public `struct`s, and `method`s in this crate have the same names. There are a few examples [here](https://github.com/letmutx/dex-parser/tree/master/examples/) to get you started.
+The primary source of documentation for dex format is [Android website](https://source.android.com/devices/tech/dalvik/dex-format). Most of the public `struct`s, and `method`s in this crate have the same names. There are a few examples [here](https://github.com/Sculas/dexlib-rs/tree/master/examples/) to get you started.
 
 ## Development Notes
 * The library makes use of [`mmap`](https://en.wikipedia.org/wiki/Mmap) to access the file contents.
