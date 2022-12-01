@@ -8,10 +8,11 @@ use scroll;
 
 #[derive(Debug)]
 pub enum Error {
-    MalFormed(String),
     IO(io::Error),
-    InvalidId(String),
+    Zip(zip::result::ZipError),
+    MalFormed(String),
     Scroll(scroll::Error),
+    InvalidId(String),
     BadOffset(usize, String),
 }
 
@@ -19,6 +20,7 @@ impl error::Error for Error {
     fn description(&self) -> &str {
         match *self {
             Error::IO(_) => "IO error",
+            Error::Zip(_) => "Zip error",
             Error::MalFormed(_) => "Entity is malformed in some way",
             Error::Scroll(_) => "Scroll error",
             Error::InvalidId(_) => "Invalid index",
@@ -29,6 +31,7 @@ impl error::Error for Error {
     fn cause(&self) -> Option<&dyn error::Error> {
         match *self {
             Error::IO(ref io) => io.source(),
+            Error::Zip(ref zip) => zip.source(),
             Error::Scroll(ref err) => err.source(),
             Error::MalFormed(_) => None,
             Error::InvalidId(_) => None,
@@ -49,10 +52,17 @@ impl From<scroll::Error> for Error {
     }
 }
 
+impl From<zip::result::ZipError> for Error {
+    fn from(err: zip::result::ZipError) -> Error {
+        Error::Zip(err)
+    }
+}
+
 impl Display for Error {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Error::IO(ref err) => write!(fmt, "{}", err),
+            Error::Zip(ref err) => write!(fmt, "{}", err),
             Error::Scroll(ref err) => write!(fmt, "{}", err),
             Error::MalFormed(ref msg) => write!(fmt, "Malformed entity: {}", msg),
             Error::InvalidId(ref msg) => write!(fmt, "{}", msg),

@@ -19,6 +19,7 @@ extern crate getset;
 pub use error::Error;
 
 pub use crate::dex::{Dex, DexReader, Header};
+pub use crate::multidex::{MultiDex, MultiDexReader};
 
 #[macro_use]
 mod utils;
@@ -27,6 +28,7 @@ mod cache;
 pub mod class;
 pub mod code;
 mod dex;
+mod multidex;
 mod encoded_item;
 pub mod encoded_value;
 mod error;
