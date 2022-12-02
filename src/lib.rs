@@ -23,20 +23,21 @@ pub use crate::multidex::{MultiDex, MultiDexReader};
 
 #[macro_use]
 mod utils;
-pub mod annotation;
 mod cache;
+mod dex;
+mod encoded_item;
+mod error;
+mod search;
+mod source;
+
+pub mod annotation;
 pub mod class;
 pub mod code;
-mod dex;
-mod multidex;
-mod encoded_item;
 pub mod encoded_value;
-mod error;
 pub mod field;
 pub mod jtype;
 pub mod method;
-mod search;
-mod source;
+pub mod multidex;
 pub mod string;
 
 /// The constant NO_INDEX is used to indicate that an index value is absent.
