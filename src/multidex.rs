@@ -1,15 +1,15 @@
-use futures::{stream, Stream, StreamExt};
-use zip::result::ZipError;
-
-use crate::DexReader;
+pub use futures::StreamExt; // re-export
 
 use super::class::Class;
 use super::Dex;
 use super::Result;
+use crate::DexReader;
+use futures::{stream, Stream};
 use std::fs::File;
 use std::io::Read;
 use std::ops::Index;
 use std::path::Path;
+use zip::result::ZipError;
 
 type Source = Vec<u8>;
 
