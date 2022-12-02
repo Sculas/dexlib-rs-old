@@ -1,3 +1,4 @@
+use futures::{stream, Stream, StreamExt};
 use zip::result::ZipError;
 
 use crate::DexReader;
@@ -16,8 +17,11 @@ pub struct MultiDex(Vec<Dex<Source>>);
 
 impl MultiDex {
     /// Iterator over the classes
-    pub fn classes(&self) -> impl Iterator<Item = Result<Class>> + '_ {
-        self.0.iter().map(|dex| dex.classes()).flatten()
+    pub fn classes(&self) -> impl Stream<Item = Result<Class>> + '_ {
+        stream::iter(&self.0).flat_map(|dex| {
+            stream::iter(dex.class_defs())
+                .map(move |classdef| Class::try_from_dex(&dex, &classdef?))
+        })
     }
 }
 
