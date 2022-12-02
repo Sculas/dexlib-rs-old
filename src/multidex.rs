@@ -17,10 +17,12 @@ pub struct MultiDex(Vec<Dex<Source>>);
 
 impl MultiDex {
     /// Iterator over the classes
-    pub fn classes(&self) -> impl Stream<Item = Result<Class>> + '_ {
+    pub fn classes(&self) -> impl Stream<Item = Class> + '_ {
         stream::iter(&self.0).flat_map(|dex| {
-            stream::iter(dex.class_defs())
-                .map(move |classdef| Class::try_from_dex(&dex, &classdef?))
+            stream::iter(dex.class_defs()).map(move |classdef| {
+                Class::try_from_dex(&dex, &classdef.expect("invalid classdef"))
+                    .expect("invalid class")
+            })
         })
     }
 }
