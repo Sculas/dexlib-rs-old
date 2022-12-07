@@ -1,10 +1,8 @@
-pub use futures::StreamExt; // re-export
-
 use super::class::Class;
 use super::Dex;
 use super::Result;
+use crate::class::ClassDefItem;
 use crate::DexReader;
-use futures::{stream, Stream};
 use std::fs::File;
 use std::io::Read;
 use std::ops::Index;
@@ -13,17 +11,33 @@ use zip::result::ZipError;
 
 type Source = Vec<u8>;
 
+macro_rules! for_all_dexes {
+    ($self:ident, $func:ident, $e:expr$(, $extra:ident)?) => {
+        $self.0.iter().$func($e)$(.$extra())?
+    };
+}
+
 pub struct MultiDex(Vec<Dex<Source>>);
 
 impl MultiDex {
-    /// Iterator over the classes
-    pub fn classes(&self) -> impl Stream<Item = Class> + '_ {
-        stream::iter(&self.0).flat_map(|dex| {
-            stream::iter(dex.class_defs()).map(move |classdef| {
+    /// Iterate over the classes.
+    pub fn classes(&self) -> impl Iterator<Item = Class> + '_ {
+        for_all_dexes!(self, flat_map, |dex| {
+            dex.class_defs().map(move |classdef| {
                 Class::try_from_dex(&dex, &classdef.expect("invalid classdef"))
                     .expect("invalid class")
             })
         })
+    }
+
+    pub fn class_defs(&self) -> impl Iterator<Item = ClassDefItem> + '_ {
+        for_all_dexes!(self, flat_map, |dex| {
+            dex.class_defs().map(|x| x.expect("invalid classdef"))
+        })
+    }
+
+    pub fn classes_amount(&self) -> u32 {
+        for_all_dexes!(self, map, |dex| dex.class_defs_amount(), sum)
     }
 }
 

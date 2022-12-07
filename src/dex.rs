@@ -602,6 +602,10 @@ where
         ClassDefItemIter::new(source, defs_offset, defs_len, endian)
     }
 
+    pub fn class_defs_amount(&self) -> u32 {
+        self.inner.class_defs_len()
+    }
+
     /// Iterator over the type_ids section.
     pub fn types(&self) -> impl Iterator<Item = Result<Type>> + '_ {
         let type_ids_len = self.inner.type_ids_len();
