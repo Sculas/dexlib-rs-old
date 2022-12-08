@@ -12,15 +12,15 @@ use zip::result::ZipError;
 type Source = Vec<u8>;
 
 macro_rules! for_all_dexes {
-    ($self:ident, $func:ident, $e:expr$(, $extra:ident)?) => {
-        $self.0.iter().$func($e)$(.$extra())?
+    ($self:ident, $func:ident, $e:expr$(, $extra:ident)*) => {
+        $self.0.iter().$func($e)$(.$extra())*
     };
 }
 
 pub struct MultiDex(Vec<Dex<Source>>);
 
 impl MultiDex {
-    /// Iterate over the classes.
+    /// Iterate over the classes ([`Class`]) contained in all dex files.
     pub fn classes(&self) -> impl Iterator<Item = Class> + '_ {
         for_all_dexes!(self, flat_map, |dex| {
             dex.class_defs().map(move |classdef| {
@@ -30,14 +30,23 @@ impl MultiDex {
         })
     }
 
+    /// Iterate over the raw class definitions ([`ClassDefItem`]) contained in all dex files.
     pub fn class_defs(&self) -> impl Iterator<Item = ClassDefItem> + '_ {
         for_all_dexes!(self, flat_map, |dex| {
             dex.class_defs().map(|x| x.expect("invalid classdef"))
         })
     }
 
+    /// Returns the amount of classes ([`Class`]) contained in all dex files.
     pub fn classes_amount(&self) -> u32 {
         for_all_dexes!(self, map, |dex| dex.class_defs_amount(), sum)
+    }
+
+    /// Finds a [`Class`] by the given class name. The name should be in smali format.
+    pub fn class_by_name(&self, descriptor: &str) -> Option<Class> {
+        for_all_dexes!(self, find_map, |dex| dex
+            .find_class_by_name(descriptor)
+            .expect("invalid classdef"))
     }
 }
 
