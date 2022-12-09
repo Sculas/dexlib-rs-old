@@ -1,4 +1,4 @@
-use std::{clone::Clone, convert::AsRef, ops::Index, rc::Rc};
+use std::{clone::Clone, convert::AsRef, ops::Index, sync::Arc};
 
 use crate::ubyte;
 
@@ -6,7 +6,7 @@ use crate::ubyte;
 /// wrapper type that allows for shallow copies
 /// of the dex file's source.
 pub(crate) struct Source<T> {
-    inner: Rc<T>,
+    inner: Arc<T>,
 }
 
 impl<T> Source<T>
@@ -15,7 +15,7 @@ where
 {
     pub(crate) fn new(inner: T) -> Self {
         Self {
-            inner: Rc::new(inner),
+            inner: Arc::new(inner),
         }
     }
 }

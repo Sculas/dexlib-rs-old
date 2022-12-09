@@ -1,15 +1,13 @@
 //! Dex String utilities
+use crate::{cache::Cache, error, error::Error, source::Source, uint, Result};
+use cesu8::{from_java_cesu8, to_java_cesu8};
+use scroll::{self, ctx, Pread, Uleb128};
 use std::{
     convert::AsRef,
     fmt,
     ops::{Deref, Range},
+    sync::Arc,
 };
-
-use cesu8::{from_java_cesu8, to_java_cesu8};
-use scroll::{self, ctx, Pread, Uleb128};
-
-use crate::{cache::Cache, error, error::Error, source::Source, uint, Result};
-use std::rc::Rc;
 
 /// Index into the `StringId`s section.
 pub type StringId = uint;
@@ -19,7 +17,7 @@ pub type StringId = uint;
 /// [Android docs](https://source.android.com/devices/tech/dalvik/dex-format#mutf-8)
 #[derive(Debug, Hash, Eq, PartialEq, Clone, PartialOrd, Ord)]
 pub struct DexString {
-    string: Rc<String>,
+    string: Arc<String>,
 }
 
 impl PartialEq<str> for DexString {
@@ -43,7 +41,7 @@ impl fmt::Display for DexString {
 impl From<String> for DexString {
     fn from(string: String) -> Self {
         DexString {
-            string: Rc::new(string),
+            string: Arc::new(string),
         }
     }
 }
@@ -72,7 +70,7 @@ impl<'a> ctx::TryFromCtx<'a, scroll::Endian> for DexString {
         let size = *offset + bytes.len();
         Ok((
             DexString {
-                string: Rc::new(
+                string: Arc::new(
                     from_java_cesu8(bytes)
                         .map_err(|e| Error::MalFormed(format!("Malformed string: {:?}", e)))?
                         .into_owned(),
