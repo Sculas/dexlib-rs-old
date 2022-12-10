@@ -1,3 +1,5 @@
+**Development has continued in another repository:** https://github.com/Sculas/dexlib-rs
+
 # dexlib
 dexlib is a parser (and soon writer) for Android's [dex](https://source.android.com/devices/tech/dalvik/dex-format) format written completely in Rust.
 
